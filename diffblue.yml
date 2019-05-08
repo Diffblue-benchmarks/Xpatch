@@ -1,0 +1,304 @@
+buildCmd: ./gradlew assemble
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+#Target TGF: 1005.33333333
+# - methods: 64
+# - complexity: 1099
+# - construction: 49.0
+# - dependency: 45.8333333333
+  - target:
+    - dir: axmlprinter/build/classes/java/main
+      file: wind/android/content/res/AXmlResourceParser.class
+      sourceDir: axmlprinter/src/main/java
+      sourceFile: wind/android/content/res/AXmlResourceParser.java
+#Target TGF: 53.0
+# - methods: 8
+# - complexity: 168
+# - construction: 3.0
+# - dependency: 1.7
+  - target:
+    - dir: axmlprinter/build/classes/java/main
+      file: wind/test/AXMLPrinter.class
+      sourceDir: axmlprinter/src/main/java
+      sourceFile: wind/test/AXMLPrinter.java
+#Target TGF: 145.866666667
+# - methods: 9
+# - complexity: 449
+# - construction: 5.2
+# - dependency: 3.66666666667
+  - target:
+    - dir: axmlprinter/build/classes/java/main
+      file: wind/android/content/res/StringBlock.class
+      sourceDir: axmlprinter/src/main/java
+      sourceFile: wind/android/content/res/StringBlock.java
+#Target TGF: 376.5
+# - methods: 18
+# - complexity: 433
+# - construction: 15.0
+# - dependency: 14.0
+  - target:
+    - dir: axmlprinter/build/classes/java/main
+      file: wind/android/content/res/AXmlResourceParser$NamespaceStack.class
+      sourceDir: axmlprinter/src/main/java
+      sourceFile: wind/android/content/res/AXmlResourceParser.java
+#Target TGF: 37.0
+# - methods: 6
+# - complexity: 122
+# - construction: 2.0
+# - dependency: 0.75
+  - target:
+    - dir: xpatch/build/classes/java/main
+      file: com/storm/wind/xpatch/task/ApkModifyTask.class
+      sourceDir: xpatch/src/main/java
+      sourceFile: com/storm/wind/xpatch/task/ApkModifyTask.java
+#Target TGF: 95.973015873
+# - methods: 13
+# - complexity: 581
+# - construction: 8.0
+# - dependency: 2.20396825397
+  - target:
+    - dir: xpatch/build/classes/java/main
+      file: com/storm/wind/xpatch/util/FileUtils.class
+      sourceDir: xpatch/src/main/java
+      sourceFile: com/storm/wind/xpatch/util/FileUtils.java
+#Target TGF: 41.0
+# - methods: 3
+# - complexity: 114
+# - construction: 2.0
+# - dependency: 0.833333333333
+  - target:
+    - dir: xpatch/build/classes/java/main
+      file: com/storm/wind/xpatch/task/BuildAndSignApkTask.class
+      sourceDir: xpatch/src/main/java
+      sourceFile: com/storm/wind/xpatch/task/BuildAndSignApkTask.java
+#Target TGF: 53.9973544974
+# - methods: 12
+# - complexity: 530
+# - construction: 7.33333333333
+# - dependency: 4.75396825397
+  - target:
+    - dir: axmlprinter/build/classes/java/main
+      file: wind/v1/XmlPullParserFactory.class
+      sourceDir: axmlprinter/src/main/java
+      sourceFile: wind/v1/XmlPullParserFactory.java
+#Target TGF: 151.083333333
+# - methods: 18
+# - complexity: 298
+# - construction: 16.0
+# - dependency: 11.9166666667
+  - target:
+    - dir: axmlprinter/build/classes/java/main
+      file: wind/android/content/res/IntReader.class
+      sourceDir: axmlprinter/src/main/java
+      sourceFile: wind/android/content/res/IntReader.java
+#Target TGF: 30.0
+# - methods: 5
+# - complexity: 90
+# - construction: 1.33333333333
+# - dependency: 1.33333333333
+  - target:
+    - dir: xpatch/build/classes/java/main
+      file: com/storm/wind/xpatch/base/BaseCommand$Option.class
+      sourceDir: xpatch/src/main/java
+      sourceFile: com/storm/wind/xpatch/base/BaseCommand.java
+dependenciesOnClasspath:
+-
+  source: classes
+  classFile: wind/v1/XmlPullParserException.class
+-
+  source: classes
+  classFile: wind/v1/XmlPullParserFactory.class
+-
+  source: classes
+  classFile: wind/android/content/res/AXmlResourceParser.class
+-
+  source: classes
+  classFile: wind/android/content/res/XmlResourceParser.class
+-
+  source: classes
+  classFile: wind/test/AXMLPrinter.class
+-
+  source: classes
+  classFile: wind/android/content/res/StringBlock.class
+-
+  source: classes
+  classFile: wind/android/content/res/IntReader.class
+-
+  source: classes
+  classFile: com/storm/wind/xpatch/util/ShellCmdUtil.class
+-
+  source: classes
+  classFile: wind/v1/XmlPullParser.class
+-
+  source: classes
+  classFile: wind/android/content/res/ChunkUtil.class
+-
+  source: classes
+  classFile: com/storm/wind/xpatch/task/ApkModifyTask.class
+-
+  source: classes
+  classFile: wind/android/content/res/AXmlResourceParser$NamespaceStack.class
+-
+  source: classes
+  classFile: com/storm/wind/xpatch/util/FileUtils.class
+-
+  source: classes
+  classFile: com/storm/wind/xpatch/task/BuildAndSignApkTask.class
+-
+  source: classes
+  classFile: com/storm/wind/xpatch/base/BaseCommand$Option.class
